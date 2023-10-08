@@ -1,0 +1,100 @@
+services:
+  dind:
+    build:
+      context: ./dind
+      args:
+        - USER=${USER:-user} # Your User Name
+        - USER_ID=${USER_ID:-1000} # Your User ID
+        - GROUP_ID=${GROUP_ID:-1000} # Your GROUP ID
+    container_name: dind
+    image: dind
+    ports:
+      - 8080:8080
+    volumes:
+      - type: volume
+        source: docker-socket
+        target: /var/run
+      - type: volume
+        source: docker-data
+        target: /var/lib/docker
+      - type: volume
+        source: home-dir
+        target: /home/${USER:-user}
+    privileged: true
+    restart: always
+
+  ssh:
+    build:
+      context: ./ssh
+      args:
+        - USER=${USER:-user} # Your User Name
+        - USER_ID=${USER_ID:-1000} # Your User ID
+        - GROUP_ID=${GROUP_ID:-1000} # Your GROUP ID
+        - KUBE_VERSION=${KUBE_VERSION:-v1.28} # K8s Version
+    container_name: ssh
+    ports:
+      - 8022:22
+    image: ssh
+    volumes:
+      - type: volume
+        source: docker-socket
+        target: /var/run/dind
+        read_only: true
+      - type: volume
+        source: home-dir
+        target: /home/${USER:-user}
+      - type: volume
+        source: ssh-config-dir
+        target: /etc/ssh
+      - type: volume
+        source: ssh-dir
+        target: /home/${USER:-user}/.ssh
+    restart: always
+
+  vscode:
+    build:
+      context: ./vscode
+      args:
+        - USER=${USER:-user} # Your User Name
+        - USER_ID=${USER_ID:-1000} # Your User ID
+        - GROUP_ID=${GROUP_ID:-1000} # Your GROUP ID
+        - KUBE_VERSION=${KUBE_VERSION:-v1.28} # K8s Version
+    container_name: vscode
+    command: ["code", "~/test"]
+    ports:
+      - 8000:8000
+    image: vscode
+    volumes:
+      - type: volume
+        source: docker-socket
+        target: /var/run/dind
+        read_only: true
+      - type: volume
+        source: home-dir
+        target: /home/${USER:-user}
+      - type: volume
+        source: vscode-data
+        target: /home/${USER:-user}/.vscode
+      - type: volume
+        source: vscode-server-data
+        target: /home/${USER:-user}/.vscode-server
+    restart: always
+
+volumes:
+    docker-socket:
+        name: docker-socket
+        driver_opts:
+          type: tmpfs
+          device: tmpfs
+    home-dir:
+        name: home-dir
+    docker-data:
+        name: docker-data
+    ssh-config-dir:
+        name: ssh-config-dir
+    ssh-dir:
+        name: ssh-dir
+    vscode-data:
+        name: vscode-data
+    vscode-server-data:
+        name: vscode-server-data
