@@ -8,8 +8,6 @@ services:
         - GROUP_ID=${GROUP_ID:-1000} # Your GROUP ID
     container_name: dind
     image: dind
-    ports:
-      - 8080:8080
     volumes:
       - type: volume
         source: docker-socket
@@ -44,11 +42,23 @@ services:
         source: home-dir
         target: /home/${USER:-user}
       - type: volume
+        source: kube-config
+        target: /home/${USER:-user}/.kube
+      - type: volume
+        source: helm-data
+        target: /home/${USER:-user}/.config/helm
+      - type: volume
         source: ssh-config-dir
         target: /etc/ssh
       - type: volume
         source: ssh-dir
         target: /home/${USER:-user}/.ssh
+      - type: volume
+        source: vscode-data
+        target: /home/${USER:-user}/.vscode
+      - type: volume
+        source: vscode-server-data
+        target: /home/${USER:-user}/.vscode-server
     restart: always
 
   vscode:
@@ -60,7 +70,6 @@ services:
         - GROUP_ID=${GROUP_ID:-1000} # Your GROUP ID
         - KUBE_VERSION=${KUBE_VERSION:-v1.28} # K8s Version
     container_name: vscode
-    command: ["code", "~/test"]
     ports:
       - 8000:8000
     image: vscode
@@ -72,6 +81,12 @@ services:
       - type: volume
         source: home-dir
         target: /home/${USER:-user}
+      - type: volume
+        source: kube-config
+        target: /home/${USER:-user}/.kube
+      - type: volume
+        source: helm-data
+        target: /home/${USER:-user}/.config/helm
       - type: volume
         source: vscode-data
         target: /home/${USER:-user}/.vscode
@@ -88,6 +103,10 @@ volumes:
           device: tmpfs
     home-dir:
         name: home-dir
+    kube-config:
+        name: kube-config
+    helm-data:
+        name: helm-data
     docker-data:
         name: docker-data
     ssh-config-dir:
