@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && groupadd docker \
     && useradd -u ${USER_ID} -m -s /bin/bash -g ${USER} -G sudo,docker ${USER} \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
-    && mkdir -p /var/run/dind && ln -s /var/run/dind/docker.sock /var/run/docker.sock
+    && mkdir -p /var/run/dind && ln -fs /var/run/dind/docker.sock /var/run/docker.sock
 
 ENV PATH=$PATH:/usr/libexec/docker/cli-plugins/
 
