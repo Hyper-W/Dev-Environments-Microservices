@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ssh
+  name: ssh
+  namespace: dev-env
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssh
+  template:
+    metadata:
+      labels:
+        app: ssh
+    spec:
+      containers:
+        - image: ssh:latest
+          name: ssh
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/dind
+              readOnly: true
+            - name: home-dir
+              mountPath: /home/user/
+            - name: kube-config
+              mountPath: /home/user/.kube
+            - name: helm-data
+              mountPath: /home/user/.config/helm
+            - name: vscode-data
+              mountPath: /home/user/.vscode
+            - name: vscode-server-data
+              mountPath: /home/user/.vscode-server
+            - name: ssh-config-dir
+              mountPath: /etc/ssh
+            - name: ssh-dir
+              mountPath: /home/user/.ssh
+      volumes:
+        - name: docker-socket
+          persistentVolumeClaim:
+            claimName: docker-socket
+        - name: home-dir
+          persistentVolumeClaim:
+            claimName: home-dir
+        - name: kube-config
+          secret:
+            secretName: kube-config
+            items:
+              - key: config
+                path: config
+        - name: helm-data
+          persistentVolumeClaim:
+            claimName: helm-data
+        - name: vscode-data
+          persistentVolumeClaim:
+            claimName: vscode-data
+        - name: vscode-server-data
+          persistentVolumeClaim:
+            claimName: vscode-server-data
+        - name: ssh-dir
+          secret:
+            secretName: ssh-config-dir
+            items:
+              - key: ssh_host_ecdsa_key
+                path: ssh_host_ecdsa_key
+              - key: ssh_host_ecdsa_key.pub
+                path: ssh_host_ecdsa_key.pub
+              - key: ssh_host_ed25519_key
+                path: ssh_host_ed25519_key
+              - key: ssh_host_ed25519_key.pub
+                path: ssh_host_ed25519_key.pub
+              - key: ssh_host_rsa_key
+                path: ssh_host_rsa_key
+              - key: ssh_host_rsa_key.pub
+                path: ssh_host_rsa_key.pub
+        - name: ssh-dir
+          secret:
+            secretName: ssh-dir
+            items:
+              - key: authorized_keys
+                path: authorized_keys
+      imagePullSecrets:
+        - name: my-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssh
+  namespace: dev-env
+spec:
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+  selector:
+    app: ssh
+  type: LoadBalancer

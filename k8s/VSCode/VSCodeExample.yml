@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: vscode
+  name: vscode
+  namespace: dev-env
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vscode
+  template:
+    metadata:
+      labels:
+        app: vscode
+    spec:
+      containers:
+        - image: vscode:latest
+          name: vscode
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/dind
+              readOnly: true
+            - name: home-dir
+              mountPath: ~/
+            - name: kube-config
+              mountPath: ~/.kube
+            - name: helm-data
+              mountPath: ~/.config/helm
+            - name: vscode-data
+              mountPath: ~/.vscode
+            - name: vscode-server-data
+              mountPath: ~/.vscode-server
+      volumes:
+        - name: docker-socket
+          persistentVolumeClaim:
+            claimName: docker-socket
+        - name: home-dir
+          persistentVolumeClaim:
+            claimName: home-dir
+        - name: kube-config
+          secret:
+            secretName: kube-config
+            items:
+              - key: config
+                path: config
+        - name: helm-data
+          persistentVolumeClaim:
+            claimName: helm-data
+        - name: vscode-data
+          persistentVolumeClaim:
+            claimName: vscode-data
+        - name: vscode-server-data
+          persistentVolumeClaim:
+            claimName: vscode-server-data
+      imagePullSecrets:
+        - name: my-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vscode
+  namespace: dev-env
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    app: vscode
+  type: ClusterIP

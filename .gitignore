@@ -1,0 +1,6 @@
+*Secret.yml
+*Config.yml
+Deploy.sh
+k8s/Dind/Dind.yml
+k8s/Ssh/Ssh.yml
+k8s/VSCode/VSCode.yml

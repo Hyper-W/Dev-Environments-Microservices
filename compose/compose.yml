@@ -13,11 +13,11 @@ services:
         source: docker-socket
         target: /var/run
       - type: volume
-        source: docker-data
-        target: /var/lib/docker
-      - type: volume
         source: home-dir
         target: /home/${USER:-user}
+      - type: volume
+        source: docker-data
+        target: /var/lib/docker
     privileged: true
     restart: always
 
@@ -48,17 +48,17 @@ services:
         source: helm-data
         target: /home/${USER:-user}/.config/helm
       - type: volume
-        source: ssh-config-dir
-        target: /etc/ssh
-      - type: volume
-        source: ssh-dir
-        target: /home/${USER:-user}/.ssh
-      - type: volume
         source: vscode-data
         target: /home/${USER:-user}/.vscode
       - type: volume
         source: vscode-server-data
         target: /home/${USER:-user}/.vscode-server
+      - type: volume
+        source: ssh-config-dir
+        target: /etc/ssh
+      - type: volume
+        source: ssh-dir
+        target: /home/${USER:-user}/.ssh
     restart: always
 
   vscode:
