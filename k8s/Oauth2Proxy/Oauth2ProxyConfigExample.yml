@@ -5,7 +5,7 @@ metadata:
   namespace: dev-env
 data:
   OAUTH2_PROXY_PROVIDER: oidc
-  OAUTH2_PROXY_REDIRECT_URL: http://Oauth2-Proxy_IP:4180/oauth2/callback
+  OAUTH2_PROXY_REDIRECT_URL: http://Oauth2-Proxy_IP/oauth2/callback
   OAUTH2_PROXY_OIDC_ISSUER_URL: http://Keycloak_IP:8080/realms/default
   OAUTH2_PROXY_COOKIE_SECURE: "false"
   OAUTH2_PROXY_COOKIE_NAME: "oauth2_proxy"
