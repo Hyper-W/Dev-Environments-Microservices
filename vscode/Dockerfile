@@ -18,10 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
     && curl -fsSL https://pkgs.k8s.io/core:/stable:/${KUBE_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg\
     && echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${KUBE_VERSION}/deb/ /" > /etc/apt/sources.list.d/kubernetes.list \
+    && curl -fsSL https://baltocdn.com/helm/signing.asc | gpg --dearmor -o /usr/share/keyrings/helm.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" > /etc/apt/sources.list.d/helm-stable-debian.list \
     && curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg \
     && install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/ \
     && echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list \
-    && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin kubectl code \
+    && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin kubectl helm code \
     && apt-get remove -y --purge --autoremove gnupg lsb-release apt-transport-https \
     && apt-get clean && rm -rf /var/lib/apt/lists/ \
     && mkdir -p /var/run/sshd \
@@ -39,7 +41,7 @@ VOLUME [ "/home/${USER}" ]
 
 WORKDIR /home/${USER}
 
-RUN mkdir -m 755 ~/.kube && touch ~/.kube/config && chmod 744 ~/.kube/config \
+RUN mkdir -p ~/.kube && touch ~/.kube/config && chmod 600 ~/.kube/config && mkdir -p ~/.config/helm \
     && echo "" >> ~/.bashrc && echo "# Kubernetes Settings" >> ~/.bashrc && echo "alias k=kubectl" >> ~/.bashrc \
     && echo "source <(kubectl completion bash)" >> ~/.bashrc && echo "complete -o default -F __start_kubectl k" >> ~/.bashrc \
     && mkdir -p "/home/${USER}/.vscode/extensions" && mkdir -p "/home/${USER}/.vscode-server" \
@@ -47,8 +49,9 @@ RUN mkdir -m 755 ~/.kube && touch ~/.kube/config && chmod 744 ~/.kube/config \
 
 VOLUME [ "/home/${USER}/.vscode" ]
 VOLUME [ "/home/${USER}/.vscode-server" ]
-VOLUME [ "/home/${USER}/${WORKDIR}" ]
+VOLUME [ "/home/${USER}/.kube" ]
+VOLUME [ "/home/${USER}/.config/helm" ]
 
-WORKDIR /home/${USER}/${WORKDIR}
+WORKDIR /home/${USER}
 
 CMD [ "code","serve-web","--host","0.0.0.0","--without-connection-token" ]
