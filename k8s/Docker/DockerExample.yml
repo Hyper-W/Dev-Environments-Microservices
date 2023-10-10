@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: docker
+  name: docker
+  namespace: dev-env
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker
+  template:
+    metadata:
+      labels:
+        app: docker
+    spec:
+      initContainers:
+        - name: remove-socket
+          image: busybox
+          command: ["sh"]
+          args:
+            - -c
+            - rm -rf /docker-socket/*
+          volumeMounts:
+            - mountPath: "/docker-socket"
+              name: docker-socket
+      containers:
+        - image: dind:latest
+          name: docker
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run
+            - name: home-dir
+              mountPath: /home/user
+            - name: docker-data
+              mountPath: /var/lib/docker
+      volumes:
+        - name: docker-socket
+          persistentVolumeClaim:
+            claimName: docker-socket
+        - name: home-dir
+          persistentVolumeClaim:
+            claimName: home-dir
+        - name: docker-data
+          persistentVolumeClaim:
+            claimName: docker-data
+      imagePullSecrets:
+        - name: my-registry
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: docker
+#   namespace: dev-env
+# spec:
+#   # ports:
+#   #   - name: export-your-docker-service
+#   #     port: 8080
+#   #     targetPort: 8080
+#   #   - name: export-your-docker-service
+#   #     port: 8000
+#   #     targetPort: 8000
+#   selector:
+#     app: docker
+#   # type: LoadBalancer
+#   type: ClusterIP

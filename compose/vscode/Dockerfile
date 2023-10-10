@@ -54,4 +54,5 @@ VOLUME [ "/home/${USER}/.config/helm" ]
 
 WORKDIR /home/${USER}
 
-CMD [ "code","serve-web","--host","0.0.0.0","--without-connection-token" ]
+ENTRYPOINT  [ "code" ]
+CMD [ "serve-web", "--host", "0.0.0.0", "--without-connection-token" ]

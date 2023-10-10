@@ -50,4 +50,4 @@ VOLUME [ "/home/${USER}/.config/helm" ]
 
 USER root
 
-CMD [ "/usr/sbin/sshd","-D" ]
+ENTRYPOINT [ "/usr/sbin/sshd","-D" ]

@@ -37,7 +37,8 @@ kubectl -n dev-env create secret docker-registry my-registry \
 
 # Deploy PVCs
 kubectl apply -f common/CommonPVC.yml
-kubectl apply -f Dind/DindPVC.yml
+kubectl apply -f Docker/DockerPVC.yml
+kubectl apply -f Ssh/SshPVC.yml
 kubectl apply -f VSCode/VSCodePVC.yml
 
 # Deploy Secrets
@@ -53,8 +54,8 @@ kubectl apply -f Ssh/SshSecretExample.yml
 kubectl apply -f Oauth2Proxy/Oauth2ProxyConfigExample.yml
 
 # Deploy Apps
-# kubectl apply -f Dind/Dind.yml
-kubectl apply -f Dind/DindExample.yml
+# kubectl apply -f Docker/Docker.yml
+kubectl apply -f Docker/DockerExample.yml
 # kubectl apply -f Ssh/Ssh.yml
 kubectl apply -f Ssh/SshExample.yml
 # kubectl apply -f VSCode/VSCode.yml
