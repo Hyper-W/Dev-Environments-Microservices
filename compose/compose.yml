@@ -54,8 +54,8 @@ services:
         source: vscode-server-data
         target: /home/${USER:-user}/.vscode-server
       - type: volume
-        source: ssh-config-dir
-        target: /etc/ssh
+        source: ssh-host-keys
+        target: /etc/ssh/host-keys
       - type: volume
         source: ssh-dir
         target: /home/${USER:-user}/.ssh
@@ -168,8 +168,8 @@ volumes:
         name: helm-data
     docker-data:
         name: docker-data
-    ssh-config-dir:
-        name: ssh-config-dir
+    ssh-host-keys:
+        name: ssh-host-keys
     ssh-dir:
         name: ssh-dir
     vscode-data:

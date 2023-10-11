@@ -15,16 +15,6 @@ spec:
       labels:
         app: ssh
     spec:
-      initContainers:
-        - name: copy-ssh-config
-          image: busybox
-          command: ["sh"]
-          args:
-            - -c
-            - rm -rf /docker-socket/*
-          volumeMounts:
-            - mountPath: "/docker-socket"
-              name: docker-socket
       containers:
         - image: ssh:latest
           name: ssh
@@ -33,7 +23,7 @@ spec:
               mountPath: /var/run/dind
               readOnly: true
             - name: home-dir
-              mountPath: /home/user
+              mountPath: /home/user/
             - name: kube-config
               mountPath: /home/user/.kube
             - name: helm-data
@@ -42,8 +32,8 @@ spec:
               mountPath: /home/user/.vscode
             - name: vscode-server-data
               mountPath: /home/user/.vscode-server
-            - name: ssh-config-dir
-              mountPath: /etc/ssh
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/host-keys
             - name: ssh-dir
               mountPath: /home/user/.ssh
       volumes:
@@ -68,12 +58,27 @@ spec:
         - name: vscode-server-data
           persistentVolumeClaim:
             claimName: vscode-server-data
-        - name: ssh-config-dir
-          persistentVolumeClaim:
-            claimName: ssh-config-dir
+        - name: ssh-host-keys
+          secret:
+            secretName: ssh-host-keys
+            defaultMode: 0600
+            items:
+              - key: ssh_host_ecdsa_key
+                path: ssh_host_ecdsa_key
+              - key: ssh_host_ecdsa_key.pub
+                path: ssh_host_ecdsa_key.pub
+              - key: ssh_host_ed25519_key
+                path: ssh_host_ed25519_key
+              - key: ssh_host_ed25519_key.pub
+                path: ssh_host_ed25519_key.pub
+              - key: ssh_host_rsa_key
+                path: ssh_host_rsa_key
+              - key: ssh_host_rsa_key.pub
+                path: ssh_host_rsa_key.pub
         - name: ssh-dir
           secret:
             secretName: ssh-dir
+            defaultMode: 0600
             items:
               - key: authorized_keys
                 path: authorized_keys

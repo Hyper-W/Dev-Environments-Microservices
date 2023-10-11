@@ -26,11 +26,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && mkdir -p /var/run/dind && ln -fs /var/run/dind/docker.sock /var/run/docker.sock \
     && sed -i '/PermitRootLogin/c PermitRootLogin no' /etc/ssh/sshd_config \
-    && sed -i '/PasswordAuthentication/c PasswordAuthentication no' /etc/ssh/sshd_config
+    && sed -i '/PasswordAuthentication/c PasswordAuthentication no' /etc/ssh/sshd_config \
+    && mkdir -p /etc/ssh/host-keys \
+    && mv /etc/ssh/ssh_host_ecdsa_key /etc/ssh/host-keys/ssh_host_ecdsa_key \
+    && mv /etc/ssh/ssh_host_ecdsa_key.pub /etc/ssh/host-keys/ssh_host_ecdsa_key.pub \
+    && mv /etc/ssh/ssh_host_ed25519_key /etc/ssh/host-keys/ssh_host_ed25519_key \
+    && mv /etc/ssh/ssh_host_ed25519_key.pub /etc/ssh/host-keys/ssh_host_ed25519_key.pub \
+    && mv /etc/ssh/ssh_host_rsa_key /etc/ssh/host-keys/ssh_host_rsa_key \
+    && mv /etc/ssh/ssh_host_rsa_key.pub /etc/ssh/host-keys/ssh_host_rsa_key.pub \
+    && ln -fs /etc/ssh/host-keys/ssh_host_ecdsa_key /etc/ssh/ssh_host_ecdsa_key \
+    && ln -fs /etc/ssh/host-keys/ssh_host_ecdsa_key.pub /etc/ssh/ssh_host_ecdsa_key.pub \
+    && ln -fs /etc/ssh/host-keys/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key \
+    && ln -fs /etc/ssh/host-keys/ssh_host_ed25519_key.pub /etc/ssh/ssh_host_ed25519_key.pub \
+    && ln -fs /etc/ssh/host-keys/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key \
+    && ln -fs /etc/ssh/host-keys/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key.pub
 
 ENV PATH=$PATH:/usr/libexec/docker/cli-plugins/
 
-VOLUME [ "/etc/ssh" ]
+VOLUME [ "/etc/ssh/host-keys" ]
 
 USER ${USER}
 
