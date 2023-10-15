@@ -23,8 +23,6 @@ spec:
           volumeMounts:
             - name: docker-server-cert
               mountPath: /etc/docker/cert/server
-            - name: docker-client-cert
-              mountPath: /etc/docker/cert/client
             - name: home-dir
               mountPath: /home/user
             - name: docker-data
@@ -41,17 +39,6 @@ spec:
                 path: server-key.pem
               - key: server-cert.pem
                 path: server-cert.pem
-        - name: docker-client-cert
-          secret:
-            secretName: docker-client-cert
-            defaultMode: 0444
-            items:
-              - key: ca.pem
-                path: ca.pem
-              - key: key.pem
-                path: key.pem
-              - key: cert.pem
-                path: cert.pem
         - name: home-dir
           persistentVolumeClaim:
             claimName: home-dir

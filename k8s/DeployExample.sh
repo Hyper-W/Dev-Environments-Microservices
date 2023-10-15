@@ -53,8 +53,6 @@ kubectl apply -f Ssh/SshSecretExample.yml
 # Deploy Configmaps
 # kubectl apply -f Oauth2Proxy/Oauth2ProxyConfig.yml
 kubectl apply -f Oauth2Proxy/Oauth2ProxyConfigExample.yml
-# kubectl apply -f Ssh/SshConfig.yml
-kubectl apply -f Ssh/SshConfigExample.yml
 
 # Deploy Apps
 # kubectl apply -f Docker/Docker.yml
