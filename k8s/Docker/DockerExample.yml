@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   labels:
     app: docker
@@ -15,32 +15,43 @@ spec:
       labels:
         app: docker
     spec:
-      initContainers:
-        - name: remove-socket
-          image: busybox
-          command: ["sh"]
-          args:
-            - -c
-            - rm -rf /docker-socket/*
-          volumeMounts:
-            - mountPath: "/docker-socket"
-              name: docker-socket
       containers:
-        - image: dind:latest
+        - image: docker:latest
           name: docker
           securityContext:
             privileged: true
           volumeMounts:
-            - name: docker-socket
-              mountPath: /var/run
+            - name: docker-server-cert
+              mountPath: /etc/docker/cert/server
+            - name: docker-client-cert
+              mountPath: /etc/docker/cert/client
             - name: home-dir
               mountPath: /home/user
             - name: docker-data
               mountPath: /var/lib/docker
       volumes:
-        - name: docker-socket
-          persistentVolumeClaim:
-            claimName: docker-socket
+        - name: docker-server-cert
+          secret:
+            secretName: docker-server-cert
+            defaultMode: 0444
+            items:
+              - key: ca.pem
+                path: ca.pem
+              - key: server-key.pem
+                path: server-key.pem
+              - key: server-cert.pem
+                path: server-cert.pem
+        - name: docker-client-cert
+          secret:
+            secretName: docker-client-cert
+            defaultMode: 0444
+            items:
+              - key: ca.pem
+                path: ca.pem
+              - key: key.pem
+                path: key.pem
+              - key: cert.pem
+                path: cert.pem
         - name: home-dir
           persistentVolumeClaim:
             claimName: home-dir
@@ -49,21 +60,21 @@ spec:
             claimName: docker-data
       imagePullSecrets:
         - name: my-registry
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: docker
-#   namespace: dev-env
-# spec:
-#   # ports:
-#   #   - name: export-your-docker-service
-#   #     port: 8080
-#   #     targetPort: 8080
-#   #   - name: export-your-docker-service
-#   #     port: 8000
-#   #     targetPort: 8000
-#   selector:
-#     app: docker
-#   # type: LoadBalancer
-#   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker
+  namespace: dev-env
+spec:
+  ports:
+    - name: docker-socket
+      port: 2357
+      targetPort: 2357
+    # - name: expose-your-docker-service
+    #   port: 8000
+    #   targetPort: 8000
+  selector:
+    app: docker
+  # type: LoadBalancer
+  type: ClusterIP

@@ -12,15 +12,15 @@ export REGISTRY=$REGISTRY_SERVER
 cd ../compose
 
 # Build Docker Images
-docker compose build dind ssh vscode
+docker compose build docker ssh vscode
 
 # Tag Docker Image For Push Registry
-docker tag dind:latest $REGISTRY/dind:latest
+docker tag docker:latest $REGISTRY/docker:latest
 docker tag ssh:latest $REGISTRY/ssh:latest
 docker tag vscode:latest $REGISTRY/vscode:latest
 
 # Push Docker Image
-docker push $REGISTRY/dind:latest
+docker push $REGISTRY/docker:latest
 docker push $REGISTRY/ssh:latest
 docker push $REGISTRY/vscode:latest
 
@@ -43,14 +43,18 @@ kubectl apply -f VSCode/VSCodePVC.yml
 # Deploy Secrets
 # kubectl apply -f common/CommonSecret.yml
 kubectl apply -f common/CommonSecretExample.yml
+# kubectl apply -f Docker/DockerSecret.yml
+kubectl apply -f Docker/DockerSecretExample.yml
 # kubectl apply -f Oauth2Proxy/Oauth2ProxySecret.yml
 kubectl apply -f Oauth2Proxy/Oauth2ProxySecretExample.yml
 # kubectl apply -f Ssh/SshSecret.yml
 kubectl apply -f Ssh/SshSecretExample.yml
 
-# Deploy Apps
+# Deploy Configmaps
 # kubectl apply -f Oauth2Proxy/Oauth2ProxyConfig.yml
 kubectl apply -f Oauth2Proxy/Oauth2ProxyConfigExample.yml
+# kubectl apply -f Ssh/SshConfig.yml
+kubectl apply -f Ssh/SshConfigExample.yml
 
 # Deploy Apps
 # kubectl apply -f Docker/Docker.yml

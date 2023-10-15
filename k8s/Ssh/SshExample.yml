@@ -19,9 +19,10 @@ spec:
         - image: ssh:latest
           name: ssh
           volumeMounts:
-            - name: docker-socket
-              mountPath: /var/run/dind
-              readOnly: true
+            - name: docker-context
+              mountPath: /home/user/.docker
+            - name: docker-client-cert
+              mountPath: /home/user/.docker/cert
             - name: home-dir
               mountPath: /home/user/
             - name: kube-config
@@ -37,9 +38,20 @@ spec:
             - name: ssh-dir
               mountPath: /home/user/.ssh
       volumes:
-        - name: docker-socket
+        - name: docker-context
           persistentVolumeClaim:
-            claimName: docker-socket
+            claimName: docker-context
+        - name: docker-client-cert
+          secret:
+            secretName: docker-client-cert
+            defaultMode: 0444
+            items:
+              - key: ca.pem
+                path: ca.pem
+              - key: key.pem
+                path: key.pem
+              - key: cert.pem
+                path: cert.pem
         - name: home-dir
           persistentVolumeClaim:
             claimName: home-dir

@@ -1,17 +1,23 @@
 services:
-  dind:
+  docker:
     build:
-      context: ./dind
+      context: ./docker
       args:
         USER: ${USER:-user} # Your User Name
         USER_ID: ${USER_ID:-1000} # Your User ID
         GROUP_ID: ${GROUP_ID:-1000} # Your GROUP ID
-    container_name: dind
-    image: dind
+        CERT_PASS: ${CERT_PASS:-docker} # Your Docker Cert Passwd
+        DOCKER_IP: ${DOCKER_IP:-docker} # Your Docker IP Address or DNS
+        CERT_NAME: DNS:${DOCKER_IP:-docker} # Your Docker IP AND DNS List Like IP:YourIP,DNS:YourDNS
+    container_name: docker
+    image: docker
     volumes:
       - type: volume
-        source: docker-socket
-        target: /var/run
+        source: docker-server-cert
+        target: /etc/docker/cert/server
+      - type: volume
+        source: docker-client-cert
+        target: /etc/docker/cert/client
       - type: volume
         source: home-dir
         target: /home/${USER:-user}
@@ -28,15 +34,17 @@ services:
         USER: ${USER:-user} # Your User Name
         USER_ID: ${USER_ID:-1000} # Your User ID
         GROUP_ID: ${GROUP_ID:-1000} # Your GROUP ID
-        KUBE_VERSION: ${KUBE_VERSION:-v1.28} # K8s Version
     container_name: ssh
     ports:
       - 8022:22
     image: ssh
     volumes:
       - type: volume
-        source: docker-socket
-        target: /var/run/dind
+        source: docker-context
+        target: /home/${USER:-user}/.docker
+      - type: volume
+        source: docker-client-cert
+        target: /home/${USER:-user}/.docker/cert
         read_only: true
       - type: volume
         source: home-dir
@@ -68,15 +76,17 @@ services:
         USER: ${USER:-user} # Your User Name
         USER_ID: ${USER_ID:-1000} # Your User ID
         GROUP_ID: ${GROUP_ID:-1000} # Your GROUP ID
-        KUBE_VERSION: ${KUBE_VERSION:-v1.28} # K8s Version
     container_name: vscode
     # ports:
       # - 8000:8000
     image: vscode
     volumes:
       - type: volume
-        source: docker-socket
-        target: /var/run/dind
+        source: docker-context
+        target: /home/${USER:-user}/.docker
+      - type: volume
+        source: docker-client-cert
+        target: /home/${USER:-user}/.docker/cert
         read_only: true
       - type: volume
         source: home-dir
@@ -155,11 +165,10 @@ services:
     restart: always  
 
 volumes:
-    docker-socket:
-        name: docker-socket
-        driver_opts:
-          type: tmpfs
-          device: tmpfs
+    docker-server-cert:
+        name: docker-server-cert
+    docker-client-cert:
+        name: docker-client-cert
     home-dir:
         name: home-dir
     kube-config:
@@ -168,6 +177,8 @@ volumes:
         name: helm-data
     docker-data:
         name: docker-data
+    docker-context:
+        name: docker-context
     ssh-host-keys:
         name: ssh-host-keys
     ssh-dir:
