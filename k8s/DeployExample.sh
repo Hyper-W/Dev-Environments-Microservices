@@ -54,6 +54,13 @@ kubectl apply -f Ssh/SshSecretExample.yml
 # kubectl apply -f Oauth2Proxy/Oauth2ProxyConfig.yml
 kubectl apply -f Oauth2Proxy/Oauth2ProxyConfigExample.yml
 
+# Init PVCs
+# kubectl apply -f common/CommonInitPVC.yml
+kubectl apply -f common/CommonInitPVCExample.yml
+# # Delete Init Jobs
+# kubectl delete -f common/CommonInitPVC.yml
+kubectl delete -f common/CommonInitPVCExample.yml
+
 # Deploy Apps
 # kubectl apply -f Docker/Docker.yml
 kubectl apply -f Docker/DockerExample.yml

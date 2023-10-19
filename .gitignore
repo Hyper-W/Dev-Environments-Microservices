@@ -4,3 +4,4 @@ Deploy.sh
 k8s/Docker/Docker.yml
 k8s/Ssh/Ssh.yml
 k8s/VSCode/VSCode.yml
+k8s/common/CommonInitPVC.yml

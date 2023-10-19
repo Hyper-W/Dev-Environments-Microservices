@@ -20,19 +20,19 @@ spec:
           name: vscode
           volumeMounts:
             - name: docker-context
-              mountPath: ~/.docker
+              mountPath: /home/user/.docker
             - name: docker-client-cert
-              mountPath: ~/.docker/cert
+              mountPath: /home/user/.docker/cert
             - name: home-dir
-              mountPath: ~/
+              mountPath: /home/user/
             - name: kube-config
-              mountPath: ~/.kube
+              mountPath: /home/user/.kube
             - name: helm-data
-              mountPath: ~/.config/helm
+              mountPath: /home/user/.config/helm
             - name: vscode-data
-              mountPath: ~/.vscode
+              mountPath: /home/user/.vscode
             - name: vscode-server-data
-              mountPath: ~/.vscode-server
+              mountPath: /home/user/.vscode-server
       volumes:
         - name: docker-context
           persistentVolumeClaim:

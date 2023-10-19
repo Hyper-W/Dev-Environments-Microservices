@@ -1,0 +1,105 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: home-dir-init
+  namespace: dev-env
+spec:
+  template:
+    spec:
+      containers:
+        - name: chown-volume
+          image: busybox
+          command: ["bash"]
+          args:
+            - -c
+            - chown 1000:1000 -R /home/user
+          volumeMounts:
+            - name: docker-context
+              mountPath: /home/user2/.docker
+            - name: docker-client-cert
+              mountPath: /home/user2/.docker/cert
+            - name: home-dir
+              mountPath: /home/user2/
+            - name: kube-config
+              mountPath: /home/user2/.kube
+            - name: helm-data
+              mountPath: /home/user2/.config/helm
+            - name: vscode-data
+              mountPath: /home/user2/.vscode
+            - name: vscode-server-data
+              mountPath: /home/user2/.vscode-server
+        - name: copy-volumes
+          image: container-registry.oracle.com/database/adb-free:23.8.5.2
+          command: ["bash"]
+          args:
+            - -c
+            - cp -aT /u01/app/oracle/oradata /u01/app/oracle/oradata-cp
+          volumeMounts:
+            - mountPath: "/u01/app/oracle/oradata-cp"
+              name: oracle-adb
+        - image: vscode:latest
+          name: vscode
+          command: ["bash"]
+          args:
+            - -c
+            - cp -aT /home/user /home/user2
+          volumeMounts:
+            - name: docker-context
+              mountPath: /home/user2/.docker
+            - name: docker-client-cert
+              mountPath: /home/user2/.docker/cert
+            - name: home-dir
+              mountPath: /home/user2/
+            - name: kube-config
+              mountPath: /home/user2/.kube
+            - name: helm-data
+              mountPath: /home/user2/.config/helm
+            - name: vscode-data
+              mountPath: /home/user2/.vscode
+            - name: vscode-server-data
+              mountPath: /home/user2/.vscode-server
+            - name: ssh-dir
+              mountPath: /home/user/.ssh
+      volumes:
+        - name: docker-context
+          persistentVolumeClaim:
+            claimName: docker-context
+        - name: docker-client-cert
+          secret:
+            secretName: docker-client-cert
+            defaultMode: 0444
+            items:
+              - key: ca.pem
+                path: ca.pem
+              - key: key.pem
+                path: key.pem
+              - key: cert.pem
+                path: cert.pem
+        - name: home-dir
+          persistentVolumeClaim:
+            claimName: home-dir
+        - name: kube-config
+          secret:
+            secretName: kube-config
+            items:
+              - key: config
+                path: config
+        - name: helm-data
+          persistentVolumeClaim:
+            claimName: helm-data
+        - name: ssh-dir
+          secret:
+            secretName: ssh-dir
+            defaultMode: 0600
+            items:
+              - key: authorized_keys
+                path: authorized_keys
+        - name: vscode-data
+          persistentVolumeClaim:
+            claimName: vscode-data
+        - name: vscode-server-data
+          persistentVolumeClaim:
+            claimName: vscode-server-data
+      imagePullSecrets:
+        - name: my-registry
+      restartPolicy: Never
